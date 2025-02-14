@@ -1,0 +1,5 @@
+.pikasu/
+dist/
+libdist/
+node_modules/
+src/
