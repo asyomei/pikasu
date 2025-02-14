@@ -23,9 +23,6 @@ importers:
       fast-glob:
         specifier: ^3.3.3
         version: 3.3.3
-      fastify:
-        specifier: ^5.2.1
-        version: 5.2.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -36,6 +33,9 @@ importers:
       '@types/node':
         specifier: ^22.13.1
         version: 22.13.1
+      fastify:
+        specifier: ^5.2.1
+        version: 5.2.1
       solid-js:
         specifier: ^1.9.4
         version: 1.9.4

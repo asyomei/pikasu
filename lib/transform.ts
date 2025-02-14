@@ -1,6 +1,10 @@
 import { readdir } from 'node:fs/promises'
 import { join, normalize, relative, resolve } from 'node:path'
 import { transformFileAsync, transformFromAstAsync } from '@babel/core'
+// @ts-expect-error
+import * as presetTs from '@babel/preset-typescript'
+// @ts-expect-error
+import * as presetSolid from 'babel-preset-solid'
 import { generateEntries } from './generate-entries'
 
 export interface Output {
@@ -66,7 +70,7 @@ export async function transform(cwd: string): Promise<Result> {
 async function transformTSFile(filepath: string): Promise<Output | undefined> {
   const result = await transformFileAsync(filepath, {
     babelrc: false,
-    presets: ['@babel/preset-typescript'],
+    presets: [presetTs],
     compact: true,
   })
   return result?.code?.at && { type: 'all', code: result.code }
@@ -75,7 +79,7 @@ async function transformTSFile(filepath: string): Promise<Output | undefined> {
 async function transformDOMFile(filepath: string): Promise<Output | undefined> {
   const result = await transformFileAsync(filepath, {
     babelrc: false,
-    presets: ['@babel/preset-typescript', ['solid', { generate: 'dom' }]],
+    presets: [presetTs, [presetSolid, { generate: 'dom' }]],
     compact: true,
   })
   return result?.code?.at && { type: 'dom', code: result.code }
@@ -86,7 +90,7 @@ async function transformSSRFile(
 ): Promise<{ output: Output; dynamic: string[] } | undefined> {
   const inter = await transformFileAsync(filepath, {
     babelrc: false,
-    presets: ['@babel/preset-typescript'],
+    presets: [presetTs],
     plugins: [join(import.meta.dirname, 'babel/wrap-client-directives.js')],
     ast: true,
     code: false,
@@ -96,7 +100,7 @@ async function transformSSRFile(
   // solid preset breaks the plugin
   const result = await transformFromAstAsync(inter.ast, undefined, {
     babelrc: false,
-    presets: [['solid', { generate: 'ssr' }]],
+    presets: [[presetSolid, { generate: 'ssr' }]],
     compact: true,
     cloneInputAst: false,
   })
