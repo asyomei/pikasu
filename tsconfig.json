@@ -11,5 +11,6 @@
     },
     "jsx": "preserve",
     "jsxImportSource": "solid-js"
-  }
+  },
+  "exclude": ["node_modules/", "dist/", "libdist/"]
 }

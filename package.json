@@ -5,8 +5,13 @@
   "description": "micro framework for solid-js, which enables partial hydrating",
   "files": ["libdist/"],
   "exports": {
-    "types": "./libdist/build.d.ts",
-    "default": "./libdist/build.js"
+    ".": {
+      "types": "./libdist/build.d.ts",
+      "default": "./libdist/build.js"
+    },
+    "./client": {
+      "types": "./libdist/client.d.ts"
+    }
   },
   "publishConfig": {
     "access": "public"
