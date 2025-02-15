@@ -5,7 +5,7 @@ import { generateEntries } from './generate-entries'
 
 const BABEL_PRESET_TS = import.meta.resolve('@babel/preset-typescript')
 const BABEL_PRESET_SOLID = import.meta.resolve('babel-preset-solid')
-const BABEL_PLUGIN_LIB = import.meta.resolve('./babel/wrap-client-directives.js')
+const BABEL_PLUGIN_LIB = import.meta.resolve('./babel/custom-directives.js')
 
 export interface Output {
   type: 'ssr' | 'dom' | 'all'

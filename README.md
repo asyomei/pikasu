@@ -32,12 +32,12 @@ the `pages/` directory acting like routes:
 - `pages/some/path.tsx -> /some/path`
 - `pages/foo/index.tsx -> /foo`
 
-all components are static by default. to make the component dynamic, add the `client:load` attribute:
+all components are static by default. to make the component dynamic, add the `pikasu-load` attribute:
 
 ```tsx
 return (
   // props will be JSON.stringify'ed, so only primitive values allows
-  <DynamicComponent client:load foo="bar">
+  <DynamicComponent pikasu-load foo="bar">
     <SomeComponent />
   </DynamicComponent>
 )

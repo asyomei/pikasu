@@ -1,8 +1,8 @@
 import type { PluginObj } from '@babel/core'
-import { transformClientDirective } from '../transform-client-directive'
-import type { BabelTypes } from '../types'
+import { transformCustomDirective } from '../transform-custom-directive'
+import type { BabelTypes } from './types'
 
-export default function babelWrapClientDirectives({ types: t }: { types: BabelTypes }): PluginObj {
+export default function babelCustomDirectives({ types: t }: { types: BabelTypes }): PluginObj {
   return {
     pre() {
       this.set('imports', [])
@@ -16,10 +16,10 @@ export default function babelWrapClientDirectives({ types: t }: { types: BabelTy
           this.get('imports').push({ items, source: path.node.source.value })
         }
       },
-      JSXNamespacedName(path) {
-        if (path.node.namespace.name !== 'client') return
+      JSXIdentifier(path) {
+        if (!path.node.name.startsWith('pikasu-')) return
 
-        const result = transformClientDirective(t, path, this.get('imports'))
+        const result = transformCustomDirective(t, path, this.get('imports'))
         if (result) {
           this.get('dynamic').push(result.dynamicSource)
         }
