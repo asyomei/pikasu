@@ -106,3 +106,10 @@ export default function Component() {
   )
 }
 ```
+
+to add types for css imports:
+- add `"@pyonpyon/pikasu/client"` to `types` in `tsconfig.json`
+- or make `src/env.d.ts` file
+  ```ts
+  /// <reference types="@pyonpyon/pikasu/client" />
+  ```
