@@ -5,12 +5,7 @@ import fastGlob from 'fast-glob'
 import { TS_RE } from './consts'
 import { generateEntryClient, generateEntryServer } from './generate-entries'
 import { transform } from './transform'
-
-export interface PikasuBuildOptions {
-  publicDir?: string
-  srcDir: string
-  outDir: string
-}
+import type { PikasuBuildOptions } from './types'
 
 export async function pikasuBuild(options: PikasuBuildOptions): Promise<void> {
   const { publicDir = './public', srcDir, outDir } = options

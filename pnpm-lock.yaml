@@ -17,9 +17,6 @@ importers:
       '@babel/preset-typescript':
         specifier: ^7.26.0
         version: 7.26.0(@babel/core@7.26.9)
-      babel-plugin-tsconfig-paths:
-        specifier: ^1.0.3
-        version: 1.0.3(@babel/core@7.26.9)
       babel-preset-solid:
         specifier: ^1.9.3
         version: 1.9.3(@babel/core@7.26.9)
@@ -478,11 +475,6 @@ packages:
     resolution: {integrity: sha512-HMkTn5A3NyydEgG7HKmm48YcnsQQyqeT6SKNWh2TrS6nn5rOLeHDfg5hPbrRUCFUqaT9WGn5NInQfMc3qne3Dg==}
     peerDependencies:
       '@babel/core': ^7.20.12
-
-  babel-plugin-tsconfig-paths@1.0.3:
-    resolution: {integrity: sha512-eBTjzXpx0CXO2gooYPyIU1joS/eK1Vk2+oLhJDwRwIgh2+2kD/j649eYNtHjFKuXr36/4Y0ytPORLyiey7MLRA==}
-    peerDependencies:
-      '@babel/core': ^7.9.0
 
   babel-preset-solid@1.9.3:
     resolution: {integrity: sha512-jvlx5wDp8s+bEF9sGFw/84SInXOA51ttkUEroQziKMbxplXThVKt83qB6bDTa1HuLNatdU9FHpFOiQWs1tLQIg==}
@@ -1194,10 +1186,6 @@ snapshots:
       html-entities: 2.3.3
       parse5: 7.2.1
       validate-html-nesting: 1.2.2
-
-  babel-plugin-tsconfig-paths@1.0.3(@babel/core@7.26.9):
-    dependencies:
-      '@babel/core': 7.26.9
 
   babel-preset-solid@1.9.3(@babel/core@7.26.9):
     dependencies:

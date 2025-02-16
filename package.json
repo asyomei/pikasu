@@ -1,12 +1,12 @@
 {
   "name": "@pyonpyon/pikasu",
   "type": "module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "micro framework for solid-js, which enables partial hydrating",
   "files": ["libdist/"],
   "exports": {
     ".": {
-      "types": "./libdist/build.d.ts",
+      "types": "./libdist/types.d.ts",
       "default": "./libdist/build.js"
     },
     "./client": {
@@ -29,7 +29,6 @@
     "@babel/core": "^7.26.9",
     "@babel/plugin-syntax-jsx": "^7.25.9",
     "@babel/preset-typescript": "^7.26.0",
-    "babel-plugin-tsconfig-paths": "^1.0.3",
     "babel-preset-solid": "^1.9.3",
     "esbuild": "^0.25.0",
     "fast-glob": "^3.3.3",
