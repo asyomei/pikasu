@@ -6,14 +6,18 @@ import { transpileDeclaration } from 'typescript'
 
 await rm('libdist', { recursive: true, force: true })
 await build({
-  entryPoints: ['./lib/build.ts', './lib/babel/custom-directives.ts'],
+  entryPoints: [
+    './lib/build.ts',
+    './lib/babel/custom-directives.ts',
+    './lib/babel/resolve-imports.ts',
+  ],
   outdir: 'libdist',
   platform: 'node',
   format: 'esm',
   minify: false,
   bundle: true,
   packages: 'external',
-  sourcemap: 'external',
+  sourcemap: 'linked',
 })
 
 await cp('lib/templates', 'libdist/templates', { recursive: true })

@@ -5,9 +5,9 @@ micro framework for solid-js, which enables partial hydrating
 ## usage
 
 ```sh
-npm i @pyonpyon/pikasu fastify
-yarn add @pyonpyon/pikasu fastify
-pnpm add @pyonpyon/pikasu fastify
+npm i @pyonpyon/pikasu solid-js
+yarn add @pyonpyon/pikasu solid-js
+pnpm add @pyonpyon/pikasu solid-js
 ```
 
 ```js
@@ -15,8 +15,8 @@ pnpm add @pyonpyon/pikasu fastify
 import { pikasuBuild } from '@pyonpyon/pikasu'
 
 await pikasuBuild({
-  srcdir: './src',
-  outdir: './dist',
+  srcDir: './src',
+  outDir: './dist',
 })
 ```
 

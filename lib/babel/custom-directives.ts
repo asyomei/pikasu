@@ -1,8 +1,8 @@
 import type { PluginObj } from '@babel/core'
-import { transformCustomDirective } from '../transform-custom-directive'
-import type { BabelTypes } from './types'
+import { type ImportElement, transformCustomDirective } from '../transform-custom-directive'
+import type { Babel } from './types'
 
-export default function babelCustomDirectives({ types: t }: { types: BabelTypes }): PluginObj {
+export default function babelCustomDirectives({ types: t }: Babel): PluginObj {
   return {
     pre() {
       this.set('imports', [])
@@ -10,26 +10,32 @@ export default function babelCustomDirectives({ types: t }: { types: BabelTypes 
     },
     visitor: {
       ImportDeclaration(path) {
-        const items = path.node.specifiers.map(x => x.local.name).filter(x => /^[A-Z]/.test(x))
+        const source = path.node.source.value
+        if (!source.startsWith('%CWD%')) return
 
+        const items = path.node.specifiers.map(x => x.local.name).filter(x => /^[A-Z]/.test(x))
         if (items.length > 0) {
-          this.get('imports').push({ items, source: path.node.source.value })
+          this.get('imports').push({ items, source })
         }
       },
       JSXIdentifier(path) {
         if (!path.node.name.startsWith('pikasu-')) return
 
+        const dynamicSources = this.get('dynamic')
         const result = transformCustomDirective(t, path, this.get('imports'))
-        if (result) {
-          this.get('dynamic').push(result.dynamicSource)
+        if (result && !dynamicSources.includes(result.dynamicSource)) {
+          dynamicSources.push(result.dynamicSource)
         }
       },
     },
-    post() {
-      const dynamic = this.get('dynamic')
-      if (dynamic.length > 0) {
-        ;(this.file.metadata as any).dynamic = dynamic
-      }
+    post(file) {
+      const imports = this.get('imports') as ImportElement[]
+      const dynamicSources = this.get('dynamic') as string[]
+      const staticSources = imports
+        .filter(x => !dynamicSources.includes(x.source))
+        .map(x => x.source)
+
+      Object.assign(file.metadata, { dynamicSources, staticSources })
     },
   }
 }

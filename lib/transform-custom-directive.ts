@@ -1,7 +1,8 @@
 import type { NodePath } from '@babel/core'
 import type { BabelTypes } from './babel/types'
+import { INDEX_TS_RE } from './consts'
 
-interface ImportElement {
+export interface ImportElement {
   source: string
   items: string[]
 }
@@ -38,7 +39,8 @@ function transformLoad(
   const attrs = component.node.openingElement.attributes
   const props = attrs.length > 0 ? jsxAttrsToObject(t, attrs) : null
 
-  const pikasuAttrs = [t.jsxAttribute(t.jsxIdentifier('data-pikasu'), t.stringLiteral(source))]
+  const sourceId = source.replace('%CWD%/', '').replace(INDEX_TS_RE, '')
+  const pikasuAttrs = [t.jsxAttribute(t.jsxIdentifier('data-pikasu'), t.stringLiteral(sourceId))]
   if (props) {
     pikasuAttrs.push(
       t.jsxAttribute(

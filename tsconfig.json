@@ -4,10 +4,10 @@
     "target": "esnext",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
-      "#/*": ["lib/*"],
-      "#s/*": ["src/*"]
+      "#/*": ["./lib/*"],
+      "#s/*": ["./src/*"]
     },
     "jsx": "preserve",
     "jsxImportSource": "solid-js"

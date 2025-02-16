@@ -22,6 +22,10 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "style": {
+        "noNonNullAssertion": "off",
+        "noParameterAssign": "off"
+      },
       "suspicious": {
         "noExplicitAny": "off"
       }
