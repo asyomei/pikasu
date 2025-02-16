@@ -81,7 +81,9 @@ export default function MainPage() {
 to get server-side data, define the function `getServerSideProps`:
 
 ```tsx
-type Props = Awaited<ResultType<typeof getServerSideProps>>
+import type { GetServerSideProps } from '@pyonpyon/pikasu'
+
+type Props = GetServerSideProps<typeof getServerSideProps>>
 
 export async function getServerSideProps() {
   const data = await fetchSomeData()
@@ -94,11 +96,11 @@ export default function Page({ data }: Props) {
 }
 ```
 
-pikasu also supports *.css and *.module.css importing:
+pikasu also supports *.css and *.module.css importing (including sass/scss):
 
 ```tsx
 import './styles.css'
-import styles from './Component.module.css'
+import styles from './Component.module.scss'
 
 export default function Component() {
   return (

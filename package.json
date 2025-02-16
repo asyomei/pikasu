@@ -1,7 +1,7 @@
 {
   "name": "@pyonpyon/pikasu",
   "type": "module",
-  "version": "0.1.2",
+  "version": "0.1.2-1",
   "description": "micro framework for solid-js, which enables partial hydrating",
   "files": ["libdist/"],
   "exports": {
