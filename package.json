@@ -1,7 +1,7 @@
 {
   "name": "@pyonpyon/pikasu",
   "type": "module",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "micro framework for solid-js, which enables partial hydrating",
   "files": ["libdist/"],
   "exports": {
@@ -31,9 +31,13 @@
     "@babel/preset-typescript": "^7.26.0",
     "babel-preset-solid": "^1.9.3",
     "esbuild": "^0.25.0",
+    "esbuild-sass-plugin": "^3.3.1",
     "fast-glob": "^3.3.3",
     "fastify": "^5.2.1",
-    "mime-types": "^2.1.35"
+    "mime-types": "^2.1.35",
+    "postcss": "^8.5.2",
+    "postcss-modules": "^6.0.1",
+    "sass-embedded": "^1.85.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
@@ -43,6 +47,6 @@
     "typescript": "^5.7.3"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["@biomejs/biome", "esbuild"]
+    "onlyBuiltDependencies": ["@biomejs/biome", "@parcel/watcher", "esbuild"]
   }
 }

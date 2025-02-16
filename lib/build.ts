@@ -1,6 +1,7 @@
 import { cp, lstat, mkdir, rm, writeFile } from 'node:fs/promises'
 import { dirname, join, resolve } from 'node:path'
 import * as esbuild from 'esbuild'
+import { postcssModules, sassPlugin } from 'esbuild-sass-plugin'
 import fastGlob from 'fast-glob'
 import { TS_RE } from './consts'
 import { generateEntryClient, generateEntryServer } from './generate-entries'
@@ -12,13 +13,11 @@ export async function pikasuBuild(options: PikasuBuildOptions): Promise<void> {
   if (!srcDir) throw new Error('srcDir is not provided')
   if (!outDir) throw new Error('outDir is not provided')
 
-  if (!(await lstat(publicDir)).isDirectory()) {
+  if (!(await lstat(publicDir).catch(() => null))?.isDirectory()) {
     throw new Error(`${publicDir} dir is missing`)
   }
 
   const { pages, staticComponents, dynamicComponents } = await transform(srcDir)
-
-  await rm('.pikasu/', { recursive: true, force: true })
 
   for (const { relpath, code } of pages.concat(staticComponents, dynamicComponents)) {
     const outpath = join('.pikasu/server', relpath)
@@ -45,6 +44,11 @@ export async function pikasuBuild(options: PikasuBuildOptions): Promise<void> {
     await cp(join(srcDir, relpath), join('.pikasu/client', relpath))
   }
 
+  const sass = sassPlugin({
+    embedded: true,
+    transform: postcssModules({}),
+  })
+
   await esbuild.build({
     absWorkingDir: resolve('.pikasu/server'),
     entryPoints: ['pikasu.js'],
@@ -63,6 +67,7 @@ export async function pikasuBuild(options: PikasuBuildOptions): Promise<void> {
       // create require for fastify
       js: 'import{createRequire}from"node:module";var require=createRequire(import.meta.url);',
     },
+    plugins: [sass],
   })
 
   await esbuild.build({
@@ -76,7 +81,14 @@ export async function pikasuBuild(options: PikasuBuildOptions): Promise<void> {
     format: 'esm',
     alias: { '%CWD%': '.pikasu/client' },
     loader: { '.jsx': 'js', '.ts': 'js', '.tsx': 'js' },
+    plugins: [sass],
   })
+
+  await rm('.pikasu/', { recursive: true })
+
+  // client doesn't load css files, so remove
+  const cssFiles = await fastGlob(join(outDir, 'client/_h/**/*.css'))
+  await Promise.all(cssFiles.map(f => rm(f)))
 
   for (const relpath of await fastGlob('**', { cwd: publicDir })) {
     const filepath = join(publicDir, relpath)
