@@ -24,6 +24,7 @@ async function transformPages(cwd: string) {
 
   for (const relpath of await fastGlob('pages/**', { cwd })) {
     if (!TS_RE.test(relpath)) continue
+    if (relpath.split('/').some(p => p.startsWith('_'))) continue
 
     const filepath = join(cwd, relpath)
     const sourceCode = await parseTSFile(cwd, filepath)
@@ -34,6 +35,10 @@ async function transformPages(cwd: string) {
     }
 
     const ssr = await parseSSRCode(sourceCode)
+
+    if (!ssr.hasDefaultFn) {
+      throw new Error(`${filepath} does not export default function`)
+    }
 
     for (const path of ssr.dynamicSources) dynamicSources.add(removeCwd(path))
     for (const path of ssr.staticSources) staticSources.add(removeCwd(path))
@@ -106,6 +111,7 @@ async function parseSSRCode(code: string) {
     code: result!.code!,
     dynamicSources: metadata.dynamicSources as string[],
     staticSources: metadata.staticSources as string[],
+    hasDefaultFn: metadata.hasDefaultFn as boolean,
   }
 }
 

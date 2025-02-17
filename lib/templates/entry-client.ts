@@ -1,16 +1,12 @@
-// @ts-check
-// @ts-ignore
-const dynamic = { './dir/Dynamic.js': () => import('./dir/Dynamic.js') }
-// REPLACE
-
 import { createComponent, hydrate } from 'solid-js/web'
+
+declare const dynamic: Record<string, () => Promise<any>>
 
 document.addEventListener('DOMContentLoaded', async () => {
   const promises = []
 
   for (const el of document.querySelectorAll('[data-pikasu]')) {
-    // @ts-ignore
-    const { pikasu, props } = el.dataset
+    const { pikasu, props } = (el as any).dataset
     const propsObj = props ? JSON.parse(props) : {}
     Object.assign(propsObj, {
       get children() {

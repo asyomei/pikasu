@@ -31,6 +31,20 @@ the `pages/` directory acting like routes:
 - `pages/index.tsx -> /`
 - `pages/some/path.tsx -> /some/path`
 - `pages/foo/index.tsx -> /foo`
+- `pages/_path/excluded.tsx -> <none>`
+- `pages/(group)/foo.tsx -> /foo`
+- `pages/[group]-[page]/[[id]].tsx -> /:group-:page/:id?`
+- `pages/bar/[...].tsx -> /bar/*`
+
+```tsx
+import type { InferRouteParams, PageContext } from '@pyonpyon/pikasu'
+
+type Params = InferRouteParams<'/[group]-[page]/[[id]]'>
+
+export default function Page({ params }: PageContext) {
+  const { group, page, id } = params as Params
+}
+```
 
 all components are static by default. to make the component dynamic, add the `pikasu-load` attribute:
 

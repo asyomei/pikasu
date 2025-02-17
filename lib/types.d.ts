@@ -27,3 +27,28 @@ export interface PikasuBuildOptions {
  * @param options build options
  */
 export function pikasuBuild(options: PikasuBuildOptions): Promise<void>
+
+export interface PageContext {
+  params: Record<string, unknown>
+}
+
+/**
+ * gets route params from route path
+ * @example
+ * ```ts
+ * type Params = InferRouteParams<'/book/[id]'>
+ * type Params = { id: string }
+ *
+ * type Params = InferRouteParams<'/books/[[id]]'>
+ * type Params = { id?: string }
+ * ```
+ */
+export type InferRouteParams<T extends string> = Simplify<PartToObject<T>>
+
+type Simplify<T> = { [K in keyof T]: T[K] } & {}
+
+type PartToObject<T extends string> = T extends `${string}[[${infer P}]]${infer R}`
+  ? { [K in P]?: string } & PartToObject<R>
+  : T extends `${string}[${infer P}]${infer R}`
+    ? { [K in P]: string } & PartToObject<R>
+    : {}

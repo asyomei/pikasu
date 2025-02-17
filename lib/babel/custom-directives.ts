@@ -7,8 +7,21 @@ export default function babelCustomDirectives({ types: t }: Babel): PluginObj {
     pre() {
       this.set('imports', [])
       this.set('dynamic', [])
+      this.set('hasDefaultFn', false)
     },
     visitor: {
+      ExportDefaultDeclaration(path) {
+        const type = path.node.declaration.type
+        const funcs: (typeof type)[] = [
+          'ArrowFunctionExpression',
+          'FunctionDeclaration',
+          'FunctionExpression',
+        ]
+
+        if (funcs.includes(type)) {
+          this.set('hasDefaultFn', true)
+        }
+      },
       ImportDeclaration(path) {
         const source = path.node.source.value
         if (!source.startsWith('%CWD%')) return
@@ -34,8 +47,13 @@ export default function babelCustomDirectives({ types: t }: Babel): PluginObj {
       const staticSources = imports
         .filter(x => !dynamicSources.includes(x.source))
         .map(x => x.source)
+      const hasDefaultFn = this.get('hasDefaultFn')
 
-      Object.assign(file.metadata, { dynamicSources, staticSources })
+      Object.assign(file.metadata, {
+        dynamicSources,
+        staticSources,
+        hasDefaultFn,
+      })
     },
   }
 }

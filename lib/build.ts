@@ -8,112 +8,134 @@ import { generateDynamic, generateRoutes, readTemplate } from './generate-entrie
 import { transform } from './transform'
 import type { PikasuBuildOptions } from './types'
 
-const stat = (path: string) => lstat(path).catch(() => null)
+const isDir = async (path: string) => (await lstat(path).catch(() => null))?.isDirectory()
 
 export async function pikasuBuild(options: PikasuBuildOptions): Promise<void> {
   const { publicDir = './public', srcDir, outDir } = options
   if (!srcDir) throw new Error('srcDir is not provided')
   if (!outDir) throw new Error('outDir is not provided')
 
-  if (!(await stat(publicDir))?.isDirectory()) {
+  if (!(await isDir(publicDir))) {
     await mkdir(publicDir)
   }
 
-  if (!(await stat(join(srcDir, 'pages')))?.isDirectory()) {
+  if (!(await isDir(join(srcDir, 'pages')))) {
     throw new Error('pages/ dir not found')
   }
 
   const { pages, staticComponents, dynamicComponents } = await transform(srcDir)
   const hasDynamic = dynamicComponents.length > 0
 
-  for (const { relpath, code } of pages.concat(staticComponents, dynamicComponents)) {
-    const outpath = join('.pikasu/server', relpath)
-    await mkdir(dirname(outpath), { recursive: true })
-    await writeFile(outpath, code)
+  try {
+    await build()
+  } finally {
+    await rm('.pikasu/', { recursive: true, force: true })
   }
 
-  for (const { relpath, clientCode } of dynamicComponents) {
-    const outpath = join('.pikasu/client', relpath)
-    await mkdir(dirname(outpath), { recursive: true })
-    await writeFile(outpath, clientCode)
-  }
+  async function build() {
+    for (const { relpath, code } of pages.concat(staticComponents, dynamicComponents)) {
+      const outpath = join('.pikasu/server', relpath)
+      await mkdir(dirname(outpath), { recursive: true })
+      await writeFile(outpath, code)
+    }
 
-  await writeFile(
-    '.pikasu/server/pikasu.js',
-    await readTemplate('entry-server.mjs', { routes: generateRoutes(pages) }),
-  )
+    for (const { relpath, clientCode } of dynamicComponents) {
+      const outpath = join('.pikasu/client', relpath)
+      await mkdir(dirname(outpath), { recursive: true })
+      await writeFile(outpath, clientCode)
+    }
 
-  if (hasDynamic) {
     await writeFile(
-      '.pikasu/client/pikasu.js',
-      await readTemplate('entry-client.mjs', { dynamic: generateDynamic(dynamicComponents) }),
+      '.pikasu/server/pikasu.js',
+      await readTemplate('entry-server.js', { routes: generateRoutes(srcDir, pages) }),
     )
-  }
-
-  for (const relpath of await fastGlob('**', { cwd: srcDir })) {
-    if (TS_RE.test(relpath)) continue
-
-    await mkdir(join('.pikasu/server', dirname(relpath)), { recursive: true })
-    await cp(join(srcDir, relpath), join('.pikasu/server', relpath))
 
     if (hasDynamic) {
-      await mkdir(join('.pikasu/client', dirname(relpath)), { recursive: true })
-      await cp(join(srcDir, relpath), join('.pikasu/client', relpath))
+      await writeFile(
+        '.pikasu/client/pikasu.js',
+        await readTemplate('entry-client.js', { dynamic: generateDynamic(dynamicComponents) }),
+      )
     }
-  }
 
-  const sass = sassPlugin({
-    embedded: true,
-    transform: postcssModules({}),
-  })
+    for (const relpath of await fastGlob('**', { cwd: srcDir })) {
+      if (TS_RE.test(relpath)) continue
 
-  await esbuild.build({
-    entryPoints: ['.pikasu/server/pikasu.js'],
-    outfile: resolve(outDir, 'server.mjs'),
-    bundle: true,
-    platform: 'node',
-    minify: true,
-    format: 'esm',
-    alias: {
-      '%CWD%': '.pikasu/server',
-      fastify: import.meta.resolve('fastify').replace('file://', ''),
-      'mime-types': import.meta.resolve('mime-types').replace('file://', ''),
-    },
-    define: {
-      hasDynamic: String(hasDynamic),
-    },
-    loader: { '.jsx': 'js', '.ts': 'js', '.tsx': 'js' },
-    banner: {
-      // create require for fastify
-      js: 'import{createRequire}from"node:module";var require=createRequire(import.meta.url);',
-    },
-    plugins: [sass],
-  })
+      await mkdir(join('.pikasu/server', dirname(relpath)), { recursive: true })
+      await cp(join(srcDir, relpath), join('.pikasu/server', relpath))
 
-  if (hasDynamic) {
-    await esbuild.build({
-      entryPoints: ['.pikasu/client/pikasu.js'],
-      outdir: resolve(outDir, 'client/_h'),
-      bundle: true,
-      platform: 'browser',
-      minify: true,
-      splitting: true,
-      format: 'esm',
-      alias: { '%CWD%': '.pikasu/client' },
-      loader: { '.jsx': 'js', '.ts': 'js', '.tsx': 'js' },
-      plugins: [sass],
+      if (hasDynamic) {
+        await mkdir(join('.pikasu/client', dirname(relpath)), { recursive: true })
+        await cp(join(srcDir, relpath), join('.pikasu/client', relpath))
+      }
+    }
+
+    const sass = sassPlugin({
+      embedded: true,
+      transform: postcssModules({}),
     })
 
-    // client doesn't load css files, so remove
-    const cssFiles = await fastGlob(join(outDir, 'client/_h/**/*.css'))
-    await Promise.all(cssFiles.map(f => rm(f)))
+    const shared: esbuild.BuildOptions = {
+      bundle: true,
+      format: 'esm',
+      loader: { '.jsx': 'js', '.ts': 'js', '.tsx': 'js' },
+      plugins: [sass],
+    }
+
+    await esbuild.build({
+      entryPoints: ['.pikasu/server/pikasu.js'],
+      outfile: resolve(outDir, 'server.mjs'),
+      platform: 'node',
+      minifyIdentifiers: true,
+      minifySyntax: true,
+      alias: {
+        '%CWD%': '.pikasu/server',
+        ...resolveExternals([
+          'mime-types',
+          'hono/router/reg-exp-router',
+          'hono/router/smart-router',
+          'hono/router/trie-router',
+        ]),
+      },
+      banner: {
+        js: [
+          'import { createRequire } from "node:module";',
+          'var require = createRequire(import.meta.url);',
+        ].join('\n'),
+      },
+      ...shared,
+    })
+
+    if (hasDynamic) {
+      await esbuild.build({
+        entryPoints: ['.pikasu/client/pikasu.js'],
+        outdir: resolve(outDir, 'client'),
+        platform: 'browser',
+        minify: true,
+        splitting: true,
+        alias: { '%CWD%': '.pikasu/client' },
+        ...shared,
+      })
+
+      // client doesn't load css files, so remove
+      const cssFiles = await fastGlob(join(outDir, 'client/**/*.css'))
+      await Promise.all(cssFiles.map(f => rm(f)))
+    }
+
+    for (const relpath of await fastGlob('**', { cwd: publicDir })) {
+      const filepath = join(publicDir, relpath)
+      const outpath = join(outDir, 'public', relpath)
+      await mkdir(dirname(outpath), { recursive: true })
+      await cp(filepath, outpath)
+    }
+  }
+}
+
+function resolveExternals(modules: string[]) {
+  const result: Record<string, string> = {}
+
+  for (const module of modules) {
+    result[module] = import.meta.resolve(module).replace('file://', '')
   }
 
-  await rm('.pikasu/', { recursive: true })
-
-  for (const relpath of await fastGlob('**', { cwd: publicDir })) {
-    const filepath = join(publicDir, relpath)
-    await mkdir(dirname(filepath), { recursive: true })
-    await cp(filepath, join(outDir, 'client', relpath))
-  }
+  return result
 }

@@ -22,6 +22,9 @@
     "enabled": true,
     "rules": {
       "recommended": true,
+      "complexity": {
+        "noBannedTypes": "off"
+      },
       "style": {
         "noNonNullAssertion": "off",
         "noParameterAssign": "off"
