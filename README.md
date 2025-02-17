@@ -43,7 +43,7 @@ return (
 )
 ```
 
-the output of component will send to client as is, so define layout with html structure:
+the output of page will send to client as is, so define layout with html structure:
 
 ```tsx
 // file: layouts/DefaultLayout.tsx
@@ -78,19 +78,12 @@ export default function MainPage() {
 }
 ```
 
-to get server-side data, define the function `getServerSideProps`:
+pages can also be async:
 
 ```tsx
-import type { GetServerSideProps } from '@pyonpyon/pikasu'
-
-type Props = GetServerSideProps<typeof getServerSideProps>
-
-export async function getServerSideProps() {
+export default async function Page() {
   const data = await fetchSomeData()
-  return { data }
-}
 
-export default function Page({ data }: Props) {
   // doing somewhat with data
   return <Layout>...</Layout>
 }
