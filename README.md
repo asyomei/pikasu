@@ -83,7 +83,7 @@ to get server-side data, define the function `getServerSideProps`:
 ```tsx
 import type { GetServerSideProps } from '@pyonpyon/pikasu'
 
-type Props = GetServerSideProps<typeof getServerSideProps>>
+type Props = GetServerSideProps<typeof getServerSideProps>
 
 export async function getServerSideProps() {
   const data = await fetchSomeData()
